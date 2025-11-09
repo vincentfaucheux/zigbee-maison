@@ -38,6 +38,13 @@ def rezdechausse():
 
     return render_template('RezDeChausse.html', radiateurs=_radiateurs)
 
+@app.route('/radiateur/<radiateur_id>/set-temperature', methods=["POST"])
+def set_temperature(radiateur_id: int):
+    # set radiateur temparature with other service
+
+    return "ok"
+
+
 if __name__ == '__main__':
     app.run(host='192.168.1.33',
             ssl_context=('../LocalRsaKey/domoserv+2.pem', '../LocalRsaKey/domoserv+2-key.pem'), 

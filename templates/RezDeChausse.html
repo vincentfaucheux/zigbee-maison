@@ -216,20 +216,20 @@
       <rect class="radiateur" x="540" y="325" width="10" height="30" rx="3" fill="orange"/>  Salle de bain -->
 
         <!-- new -->
-          {% for r in radiateurs %}
-          <rect
-            class="radiateur"
-            data-id="{{ r.id }}"
-            data-nom="{{ r.nom }}"
-            data-temp="{{ r.temp }}"
-            x="{{ r.x }}"
-            y="{{ r.y }}"
-            width="{{ r.width }}"
-            height="{{ r.height }}"
-            rx="3"
-            fill="orange"
-          />
-          {% endfor %}
+        {% for r in radiateurs %}
+        <rect
+          class="radiateur"
+          data-id="{{ r.id }}"
+          data-nom="{{ r.nom }}"
+          data-temp="{{ r.temp }}"
+          x="{{ r.x }}"
+          y="{{ r.y }}"
+          width="{{ r.width }}"
+          height="{{ r.height }}"
+          rx="3"
+          fill="orange"
+        />
+        {% endfor %}
       </svg>
 
       <!-- new -->
@@ -280,11 +280,39 @@
         };
 
         applyTemp.onclick = () => {
-          alert(
-            `Nouvelle température pour ${nomRadiateur.textContent} : ${newTemp.value} °C`
+          const targetEl = document.querySelector(
+            `.radiateur[data-nom="${nomRadiateur.textContent}"]`
           );
-          modal.style.display = "none";
-          // Ici tu peux envoyer la valeur au serveur avec fetch()
+          const radiateurId = targetEl ? targetEl.dataset.id : null;
+          if (!radiateurId) {
+            alert("Impossible de trouver l'ID du radiateur.");
+            modal.style.display = "none";
+            return;
+          }
+
+          fetch(
+            `/radiateur/${encodeURIComponent(radiateurId)}/set-temperature`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ temp: parseFloat(newTemp.value) }),
+            }
+          )
+            .then((res) => {
+              if (!res.ok) throw new Error("Erreur réseau");
+              return res.json().catch(() => ({}));
+            })
+            .then((data) => {
+              // Met à jour l'affichage et le dataset local
+              if (targetEl) targetEl.dataset.temp = newTemp.value;
+              tempRadiateur.textContent = newTemp.value;
+              alert(`Température mise à jour : ${newTemp.value} °C`);
+              modal.style.display = "none";
+            })
+            .catch((err) => {
+              console.error(err);
+              alert("Échec de la mise à jour de la température.");
+            });
         };
       </script>
       <!-- end new -->
