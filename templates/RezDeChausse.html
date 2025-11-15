@@ -35,7 +35,7 @@
         display: inline-block;
       }
 
-      /* Fenêtre modale */
+      /* Fenêtre modale*/
       .modal {
         display: none;
         position: fixed;
@@ -54,6 +54,49 @@
         border-radius: 8px;
         text-align: center;
       }
+      /* Empiler les boutons verticalement */
+      .button-column {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column; /* empile verticalement */
+        gap: 10px;              /* espace entre les boutons */
+      } 
+
+      /* Empiler les items horizontalement */
+      .items-row{
+        text-align: left;
+        display: flex;
+        flex-direction: row; /* empile horizontalement */
+        gap: 10px;              /* espace entre les items*/
+      } 
+      
+      /* Empiler les items verticalement */
+      .groups-column{
+        text-align: left;
+        display: flex;
+        flex-direction: column; /* empile verticalement */
+        gap: 20px;              /* espace entre les items*/
+      } 
+      
+      /* Empiler les items times verticalement */
+      .times-column{
+        text-align: left;
+        display: flex;
+        flex-direction: column; /* empile verticalement */
+        gap: 10px;              /* espace entre les items*/
+      } 
+
+      select {
+        width: 100px;
+        padding: 8px;
+        margin-top: 8px;
+      }
+
+      /* sélection par ID */
+      #h-select, #m-select {
+        width: 60px;
+      } 
+
       .close {
         color: red;
         float: right;
@@ -205,6 +248,7 @@
           nom="{{ r.nom }}"
           data-nom="{{ r.nom }}"
           data-state="{{ r.state }}"
+          data-nom_state =""
           data-schedule="{{ r.schedule }}"
           x="{{ r.x }}"
           y="{{ r.y }}"
@@ -216,74 +260,170 @@
       </svg>
 
 
-      <!-- Fenêtre modale -->
-      <div id="modal" class="modal">
+      <!-- Fenêtre modale main-->
+      <div id="MainModal" class="modal">
         <div class="modal-content">
-          <span class="close" id="closeModal">&times;</span>
-          <h2 id="nomRadiateur"></h2>
-          <p>Etat actuel : <span id="StateRadiateur"></span></p>
-          <input type="number" id="newState" min="0" max="3" step="1" />
-          <button id="applyState">Appliquer</button>
+          <span class="close" id="closeModal_main">&times;</span>
+          <h2 id="MainNomRadiateur"></h2>
+          <p>Etat actuel : <span id="MainStateRadiateur"></span></p>
+          <div class="button-column">
+            <button id="modify_req">Modifier une fois</button>
+            <button id="config_req">Configurer</button>
+          </div>
         </div>
       </div>
 
+
+      <!-- Fenêtre modale Modifier-->
+      <div id="ModifModal" class="modal">
+        <div class="modal-content">
+          <span class="close" id="closeModal_modif">&times;</span>
+          <h2 id="ModifNomRadiateur"></h2>
+          <p>Etat actuel : <span id="ModifStateRadiateur"></span></p>
+          <div class="groups-column">
+            <div class="items-row">
+              <label for="mode-select">Nouveau mode :</label>
+              <select id="mode-select">
+                <option value="off">Off</option>
+                <option value="confort">Confort</option>
+                <option value="eco">Éco</option>
+                <option value="hors-gel">Hors gel</option>
+              </select>
+            </div>
+            <div class="times-column">
+              <label for="duree-select">Selection de la durée :</label>
+              <div class="items-row">
+                <label for="h-select">Heures :</label>
+                <select id="h-select">
+                  <!-- Heures 00 à 23 -->
+                  <option value="00">00</option>
+                  <option value="01">01</option>
+                  <option value="02">02</option>
+                  <option value="03">03</option>
+                  <option value="04">04</option>
+                  <option value="05">05</option>
+                  <option value="06">06</option>
+                  <option value="07">07</option>
+                  <option value="08">08</option>
+                  <option value="09">09</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="13">13</option>
+                  <option value="14">14</option>
+                  <option value="15">15</option>
+                  <option value="16">16</option>
+                  <option value="17">17</option>
+                  <option value="18">18</option>
+                  <option value="19">19</option>
+                  <option value="20">20</option>
+                  <option value="21">21</option>
+                  <option value="22">22</option>
+                  <option value="23">23</option>
+                </select>
+
+                <label for="m-select">Minutes :</label>
+                <select id="m-select">
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <input type="number" id="newState" min="0" max="3" step="1" />
+
+          <div class="button-column">
+            <button id="Apply_modif_req">Modifier</button>
+          </div>
+        </div>
+      </div>
+
+
       <script>
-        const modal = document.getElementById("modal");
-        const nomRadiateur = document.getElementById("nomRadiateur");
-        const StateRadiateur = document.getElementById("StateRadiateur");
+        const MainModal = document.getElementById("MainModal");
+        const ModifModal = document.getElementById("ModifModal");
+        const MainNomRadiateur = document.getElementById("MainNomRadiateur");
+        const MainStateRadiateur = document.getElementById("MainStateRadiateur");
+        const ModifNomRadiateur = document.getElementById("ModifNomRadiateur");
+        const ModifStateRadiateur = document.getElementById("ModifStateRadiateur");
         const newState = document.getElementById("newState");
-        const applyState= document.getElementById("applyState");
+        const modify_req = document.getElementById("modify_req");
+        const config_req = document.getElementById("config_req");
+        const apply_modif_req = document.getElementById("Apply_modif_req");
 
         // Dictionnaire de correspondance valeur → couleur
         const couleurs = {
           0: "black",
-          1: "blue",
+          1: "red",
           2: "yellow",
-          3: "red"
+          3: "blue"
+        };
+
+        // Dictionnaire de correspondance valeur → nom de l'état
+        const nom_state = {
+          0: "Off",
+          1: "Confort",
+          2: "Eco",
+          3: "Hors gel"
         };
 
         function ChangeRadiateurColor() {
           console.log("Changing radiateur colors...");
           // Boucle sur les rectangles SVG
-          for (let i = 1; i <= 7; i++) {
-            console.log(`try radiateur ${i}`);
-            const rect = document.getElementById(i.toString());
-            if (rect) {
-              console.log(`radiateur ${i}: etat: ${rect.dataset.state}`);
-              const couleur = couleurs[ rect.dataset.state] || "gray"; // défaut si valeur inconnue
-              rect.setAttribute("fill", couleur);
-            }
-            else {
-              console.warn(`Rectangle avec l'ID ${i} non trouvé.`);
-            } 
-          }
+          const items = document.querySelectorAll(".radiateur");
+          console.log(`Found ${items.length} radiateurs.`);
+          items.forEach((item) => {
+            console.log(`radiateur ${item.id}: etat: ${item.dataset.state}`);
+            const couleur = couleurs[ item.dataset.state] || "gray"; // défaut si valeur inconnue
+            item.dataset.nom_state = nom_state[ item.dataset.state] || "Inconnu";
+            item.setAttribute("fill", couleur);
+          });
         };
 
         document.querySelectorAll(".radiateur").forEach((el) => {
           el.addEventListener("click", () => {
-            nomRadiateur.textContent = el.dataset.nom;
-            StateRadiateur.textContent = el.dataset.state;
+            MainNomRadiateur.textContent = el.dataset.nom;
+            MainStateRadiateur.textContent = el.dataset.nom_state;
             newState.value = el.dataset.state;
-            modal.style.display = "block";
+            MainModal.style.display = "block";
           });
         });
 
-        document.getElementById("closeModal").onclick = () => {
-          modal.style.display = "none";
+        document.getElementById("closeModal_main").onclick = () => {
+          MainModal.style.display = "none";
+        };
+        
+        document.getElementById("closeModal_modif").onclick = () => {
+          ModifModal.style.display = "none";
         };
 
         window.onclick = (event) => {
-          if (event.target === modal) modal.style.display = "none";
+          if (event.target === MainModal) MainModal.style.display = "none";
+          if (event.target === ModifModal) ModifModal.style.display = "none";
         };
 
-        applyState.onclick = () => {
+        modify_req.onclick = () => {
+          MainModal.style.display = "none";
+          ModifNomRadiateur.textContent = MainNomRadiateur.textContent;
+          ModifStateRadiateur.textContent = MainStateRadiateur.textContent;
+          ModifModal.style.display = "block";
+        };
+
+        config_req.onclick = () => {
+          alert("Fonction de configuration non encore implémentée.");
+        };
+
+        apply_modif_req.onclick = () => {
           const targetEl = document.querySelector(
-            `.radiateur[data-nom="${nomRadiateur.textContent}"]`
+            `.radiateur[data-nom="${MainNomRadiateur.textContent}"]`
           );
           const radiateurId = targetEl ? targetEl.dataset.id : null;
           if (!radiateurId) {
             alert("Impossible de trouver l'ID du radiateur.");
-            modal.style.display = "none";
+            MainModal.style.display = "none";
             return;
           }
 
@@ -304,9 +444,9 @@
             .then((data) => {
               // Met à jour l'affichage et le dataset local
               if (targetEl) targetEl.dataset.state = newState.value;
-              StateRadiateur.textContent = newState.value;
-              alert(`État mis à jour : ${newState.value}`);
-              modal.style.display = "none";
+              MainStateRadiateur.textContent = newState.value;
+              console.log(`État mis à jour : ${newState.value}`);
+              ModifModal.style.display = "none";
               ChangeRadiateurColor();
             })
             .catch((err) => {
