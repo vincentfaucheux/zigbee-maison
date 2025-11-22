@@ -256,7 +256,6 @@
         <rect
           class="radiateur"
           id="{{ r.id }}"
-          data-id="{{ r.id }}"
           nom="{{ r.nom }}"
           data-nom="{{ r.nom }}"
           data-state="{{ r.state }}"
@@ -596,19 +595,11 @@
         };
 
         apply_modif_radiateur_req.onclick = () => {
-          const targetEl = document.querySelector(
-            `.radiateur[data-nom="${MainNomRadiateur.textContent}"]`
-          );
-          const radiateurId = targetEl ? targetEl.dataset.id : null;
-          if (!radiateurId) {
-            alert("Impossible de trouver l'ID du radiateur.");
-            ModifRadiateurModal.style.display = "none";
-            return;
-          }
-
-          if((HComboRad.value != 0) || (MComboRad.value != 0)){
+          if(((HComboRad.value != 0) || (MComboRad.value != 0)) &&
+            (itempointer != null))
+          {
             fetch(
-              `/radiateur/${encodeURIComponent(radiateurId)}/set-NewRadiateurState`,
+              `/radiateur/${encodeURIComponent(itempointer.id)}/set-NewRadiateurState`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -625,10 +616,10 @@
             })
             .then((data) => {
 
-              if (targetEl) {
-                targetEl.dataset.state = ModeComboRad.value;
-                targetEl.dataset.forceheure = HComboRad.value;
-                targetEl.dataset.forceminute = MComboRad.value;  
+              if (itempointer) {
+                itempointer.dataset.state = ModeComboRad.value;
+                itempointer.dataset.forceheure = HComboRad.value;
+                itempointer.dataset.forceminute = MComboRad.value;  
               }
               MainStateRadiateur.textContent = ModeComboRad.value;
               console.log(`État mis à jour : ${ModeComboRad.value}`);
@@ -648,7 +639,9 @@
         };
 
         apply_modif_piece_req.onclick = () => {
-           if((HComboPiece.value != 0) || (MComboPiece.value != 0)){
+           if(((HComboPiece.value != 0) || (MComboPiece.value != 0)) &&
+            (itempointer != null))
+           {
             fetch(
               `/piece/${encodeURIComponent(itempointer.id)}/set-NewGroupeState`,
               {
